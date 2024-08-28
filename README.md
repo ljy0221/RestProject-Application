@@ -51,7 +51,8 @@
 <li> 일기 : 달력에서 날짜를 선택하여 일기 작성 전 감정을 먼저 기록<br/>
     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 이후 자유롭게 일기를 작성하고, 일기 작성 후 감정을 기록하여 작성한 일기를 저장<br/>
     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 이미 일기를 작성한 날짜일 경우 기록했던 전후 감정을 보여줌<br/>
-    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 연필 버튼을 눌러 일기를 수정, 휴지통 버튼을 눌러 일기 삭제 가능</li>
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 연필 버튼을 눌러 일기를 수정, 휴지통 버튼을 눌러 일기 삭제 가능<br/>
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 일기 작성 후 감정을 기반으로, 알맞은 배경 음악을 생성하고 플레이함
 
 
 
