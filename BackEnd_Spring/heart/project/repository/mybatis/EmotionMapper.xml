@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="heart.project.repository.mybatis.EmotionMapper">
+
+    <update id="preSave">
+        UPDATE (select e.*, d.is_public as new_pub from emotion e, diary d where e.diary_id = d.diary_id and d.updated_by='새 일기 등록') s
+        SET s.is_public = new_pub,
+        updated_at=CURRENT_TIMESTAMP,
+        updated_by='새 일기 등록'
+        WHERE is_public = 'Y'
+    </update>
+
+    <insert id="save">
+        insert into emotion (diary_id, member_id, before_emotion, after_emotion, emotion_time, created_at, created_by, updated_at, updated_by)
+        values (#{diaryId}, #{memberId}, #{beforeEmotion}, #{afterEmotion}, TO_CHAR(CURRENT_TIMESTAMP, 'HH24'), CURRENT_TIMESTAMP, '감정 생성', CURRENT_TIMESTAMP, '감정 생성')
+    </insert>
+
+    <select id="findNewEmotion" resultType="Emotion">
+        select emotion_id, diary_id, member_id, before_emotion, after_emotion, emotion_time
+        from emotion
+        where emotion_id = (select max(emotion_id) from emotion)
+    </select>
+
+    <update id="delete">
+        update emotion
+        set is_public = 'N'
+        where diary_id = #{diaryId}
+    </update>
+
+    <select id="findByDiaryId" resultType="Emotion">
+        select emotion_id, diary_id, member_id, after_emotion, emotion_time
+        from emotion
+        where diary_id = #{diaryId} and is_public = 'Y'
+    </select>
+
+    <select id="getMonthlyEmotionStatistics" resultType="java.util.LinkedHashMap" parameterType="java.util.Map">
+        select
+        TO_CHAR(TO_DATE(d.write_date, 'YYYYMMDD'), 'YYYYMM') AS month,
+        ROUND(COALESCE(SUM(CASE WHEN e.after_emotion = 'joy' THEN 1 ELSE 0 END) / NULLIF(COUNT(e.after_emotion), 0) * 100, 0)) / 100 AS joy,
+        ROUND(COALESCE(SUM(CASE WHEN e.after_emotion = 'hope' THEN 1 ELSE 0 END) / NULLIF(COUNT(e.after_emotion), 0) * 100, 0)) / 100 AS hope,
+        ROUND(COALESCE(SUM(CASE WHEN e.after_emotion = 'neutrality' THEN 1 ELSE 0 END) / NULLIF(COUNT(e.after_emotion), 0) * 100, 0)) / 100 AS neutrality,
+        ROUND(COALESCE(SUM(CASE WHEN e.after_emotion = 'sadness' THEN 1 ELSE 0 END) / NULLIF(COUNT(e.after_emotion), 0) * 100, 0)) / 100 AS sadness,
+        ROUND(COALESCE(SUM(CASE WHEN e.after_emotion = 'anger' THEN 1 ELSE 0 END) / NULLIF(COUNT(e.after_emotion), 0) * 100, 0)) / 100 AS anger,
+        ROUND(COALESCE(SUM(CASE WHEN e.after_emotion = 'anxiety' THEN 1 ELSE 0 END) / NULLIF(COUNT(e.after_emotion), 0) * 100, 0)) / 100 AS anxiety,
+        ROUND(COALESCE(SUM(CASE WHEN e.after_emotion = 'tiredness' THEN 1 ELSE 0 END) / NULLIF(COUNT(e.after_emotion), 0) * 100, 0)) / 100 AS tiredness,
+        ROUND(COALESCE(SUM(CASE WHEN e.after_emotion = 'regret' THEN 1 ELSE 0 END) / NULLIF(COUNT(e.after_emotion), 0) * 100, 0)) / 100 AS regret
+        from diary d
+        LEFT JOIN emotion e ON d.diary_id = e.diary_id
+        where d.member_id = #{memberId} AND d.is_public = 'Y'
+          and TO_CHAR(TO_DATE(d.write_date, 'YYYYMMDD'), 'YYYYMM') = #{month}
+        group by TO_CHAR(TO_DATE(d.write_date, 'YYYYMMDD'), 'YYYYMM')
+    </select>
+
+    <select id="getTopEmotionsByMonth" resultType="java.util.LinkedHashMap" parameterType="java.util.Map">
+        select e.after_emotion, COUNT(e.after_emotion) AS count
+        from diary d
+        LEFT JOIN emotion e ON d.diary_id = e.diary_id
+        where d.member_id = #{memberId} and d.is_public = 'Y'
+        and TO_CHAR(TO_DATE(d.write_date, 'YYYYMMDD'), 'YYYYMM') = #{month}
+        group by e.after_emotion
+        order by count DESC
+        FETCH FIRST 3 ROWS ONLY
+    </select>
+
+    <select id="getHourlyEmotion" resultType="java.util.LinkedHashMap">
+        select
+            tr.time_range,
+            NVL(main.after_emotion, 'NONE') AS after_emotion,
+            NVL(main.count, 0) AS count
+        from (
+            select '0-5' AS time_range from dual UNION ALL
+            select '6-11' from dual UNION ALL
+            select '12-17' from dual UNION ALL
+            select '18-23' from dual
+        ) tr
+        LEFT JOIN (
+            select after_emotion, count, time_range
+            from (
+                select e.after_emotion, COUNT(e.after_emotion) AS count,
+                    CASE
+                        WHEN TO_NUMBER(e.emotion_time) BETWEEN 0 AND 5 THEN '0-5'
+                        WHEN TO_NUMBER(e.emotion_time) BETWEEN 6 AND 11 THEN '6-11'
+                        WHEN TO_NUMBER(e.emotion_time) BETWEEN 12 AND 17 THEN '12-17'
+                        WHEN TO_NUMBER(e.emotion_time) BETWEEN 18 AND 23 THEN '18-23'
+                    END AS time_range,
+                    ROW_NUMBER() OVER (PARTITION BY
+                        CASE
+                            WHEN TO_NUMBER(e.emotion_time) BETWEEN 0 AND 5 THEN '0-5'
+                            WHEN TO_NUMBER(e.emotion_time) BETWEEN 6 AND 11 THEN '6-11'
+                            WHEN TO_NUMBER(e.emotion_time) BETWEEN 12 AND 17 THEN '12-17'
+                            WHEN TO_NUMBER(e.emotion_time) BETWEEN 18 AND 23 THEN '18-23'
+                        END
+                        order by COUNT(e.after_emotion) DESC
+                    ) AS rn
+                from diary d
+                LEFT JOIN emotion e ON d.diary_id = e.diary_id
+                where d.member_id = #{memberId} AND d.is_public = 'Y'
+                group by e.after_emotion,
+                    CASE
+                        WHEN TO_NUMBER(e.emotion_time) BETWEEN 0 AND 5 THEN '0-5'
+                        WHEN TO_NUMBER(e.emotion_time) BETWEEN 6 AND 11 THEN '6-11'
+                        WHEN TO_NUMBER(e.emotion_time) BETWEEN 12 AND 17 THEN '12-17'
+                        WHEN TO_NUMBER(e.emotion_time) BETWEEN 18 AND 23 THEN '18-23'
+                    END
+            )
+            where rn = 1
+        ) main ON tr.time_range = main.time_range
+        order by
+            CASE tr.time_range
+                WHEN '0-5' THEN 1
+                WHEN '6-11' THEN 2
+                WHEN '12-17' THEN 3
+                WHEN '18-23' THEN 4
+            END
+    </select>
+
+
+</mapper>
