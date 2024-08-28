@@ -11,9 +11,10 @@
 
 ## 프로젝트 실행
 1. <b>'Flutter'</b> 폴더 다운로드 <br/>
-2. 터미널에 - flutter pub get
-3. ctrl + shift + P 로 안드로이드 애뮬레이터 실행
-4. 터미널에 - flutter run
+2. 터미널에 - cd heart
+3. 터미널에 - flutter pub get
+4. ctrl + shift + P 로 안드로이드 애뮬레이터 실행
+5. 터미널에 - flutter run
 
 <br/><br/>
 
