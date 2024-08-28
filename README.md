@@ -75,7 +75,7 @@
 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 진행 중인 행동을 눌러 행동 이후 감정을 기록하고 행동을 완료할 수 있음<br/>
 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 만약 감정이 부정적인 것에서 긍정적인 종류로 변했을 경우, 누정되어 통계 페이지에 나타남
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 만약 감정이 부정적인 것에서 긍정적인 종류로 변했을 경우, 누적되어 통계 페이지에 나타남
 
 
 <br/><br/><br/>
