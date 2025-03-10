@@ -10,8 +10,8 @@
 <br/><br/>
 
 ## 프로젝트 실행
-flutter pub get
-flutter run
+1. flutter pub get
+2. flutter run
 
 <br/><br/>
 
